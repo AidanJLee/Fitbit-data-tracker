@@ -6,6 +6,7 @@ import { LoginScreen } from "./Index";
 import { RegistrationScreen } from "./Index";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import PVTScreen from "./src/Screens/PVTScreen/PVTScreen";
 
 // import { decode, encode } from "base-64";
 // if (!global.btoa) {
@@ -22,7 +23,7 @@ export default function App() {
 	const [user, setUser] = useState(null);
 
 	return (
-		<NavigationContainer>
+		/*<NavigationContainer>
 			<Text>Hello</Text>
 			<Stack.Navigator>
 				{user ? (
@@ -39,6 +40,8 @@ export default function App() {
 					</>
 				)}
 			</Stack.Navigator>
-		</NavigationContainer>
+		</NavigationContainer>*/
+		<PVTScreen>
+		</PVTScreen>
 	);
 }
