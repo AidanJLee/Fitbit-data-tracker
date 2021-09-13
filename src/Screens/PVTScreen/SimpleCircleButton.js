@@ -12,7 +12,7 @@ export default class SimpleCircleButton extends React.Component {
           style = {localStyles.button}
           onPress = {this.props.onPress}          
         >
-            <Text style={localStyles.text}>Hello World</Text>
+            <Text style={localStyles.text}>CLICK TO START</Text>
           {this.props.children}
         </TouchableOpacity>
       </View>
@@ -28,24 +28,25 @@ const styles = (props) => StyleSheet.create({
   container: {
     position: 'relative',
     zIndex: 0,
-    backgroundColor: 'rgba(255,95,28,1)', //add a background to highlight the touchable area
-    alignItems: 'center'
+    //backgroundColor: 'rgba(255,95,28,1)', //add a background to highlight the touchable area
+    alignItems: 'center',
+    marginBottom:50
   },
   button: {
     backgroundColor: 'rgba(0,210,0,1)',
     justifyContent: 'center',
     alignContent: 'center',
     borderWidth: 3,
-    borderRadius: devWidth * 3 / 4,
-    width: devWidth * 3 / 4,
-    height: devWidth * 3 / 4,
+    borderRadius: devWidth * 4 / 5,
+    width: devWidth * 4 / 5,
+    height: devWidth * 4 / 5,
     borderColor: 'rgba(0,210,0,1)'
   }
   ,
   text: {
     justifyContent: 'center',
     alignContent: 'center',
-    marginLeft: devWidth /3.5
+    marginLeft: devWidth /4.2
   }
 });
 
