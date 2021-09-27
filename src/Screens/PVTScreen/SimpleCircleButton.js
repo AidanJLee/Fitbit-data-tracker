@@ -1,11 +1,13 @@
-import React, { Component } from 'react';
+import {React, Component , useEffect} from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Dimensions, Alert} from 'react-native';
+import BackgroundTimer from "react-native-background-timer";
+import { useEffect } from 'react';
 
 export default class SimpleCircleButton extends Component {
   constructor(props) {
-    super(props);
-    this.state = { timer: 3};
+    super(props);    
     this.state = { colorId:0 };
+    this.state = { second:0 };
   }
   onPress = () => {
     if (this.state.colorId === 1)
@@ -15,12 +17,20 @@ export default class SimpleCircleButton extends Component {
     else 
     {
       this.setState({colorId: 1});
-      const min = 1;
-      const max = 4;
-      const rand = min + Math.random() * (max - min);
+      const min = 10;
+      const max = 40;
+      const rand = min + Math.random() * (max - min); //use this to set timer, number will be in increments of tenths of seconds ie 4 seconds = 40 tenths. this is needed to get the timer accurate
       alert(rand);
     }
   };
+
+  onStart = (rand) => {
+    this.interval = BackgroundTimer.setInterval(() => {
+      this.setState({
+        second: this.state.second + 1,
+      })
+    }, 100)
+  }
 
   render(){
     return (
