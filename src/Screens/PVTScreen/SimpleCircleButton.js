@@ -1,7 +1,6 @@
-import {React, Component , useEffect} from 'react';
+import React, {Component , useEffect} from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Dimensions, Alert} from 'react-native';
 import BackgroundTimer from "react-native-background-timer";
-import { useEffect } from 'react';
 
 export default class SimpleCircleButton extends Component {
   constructor(props) {
