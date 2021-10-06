@@ -1,17 +1,29 @@
 import React, {Component , useEffect} from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Dimensions, Alert} from 'react-native';
-import BackgroundTimer from "react-native-background-timer";
+
 
 export default class SimpleCircleButton extends Component {
   constructor(props) {
     super(props);    
-    this.state = { colorId:0 };
-    this.state = { second:0 };
+    this.state = { 
+      colorId:0 ,
+      time: 0,
+      isOn: false,
+      start: 0
+    };
+    
+    this.startTimer = this.startTimer.bind(this)
+    this.stopTimer = this.stopTimer.bind(this)
+    this.resetTimer = this.resetTimer.bind(this)
+
   }
   onPress = () => {
     if (this.state.colorId === 1)
     {
       this.setState({colorId: 0});
+      this.stopTimer();
+      var time = this.state.time;
+      this.resetTimer();
     }
     else 
     {
@@ -20,20 +32,33 @@ export default class SimpleCircleButton extends Component {
       const max = 40;
       const rand = min + Math.random() * (max - min); //use this to set timer, number will be in increments of tenths of seconds ie 4 seconds = 40 tenths. this is needed to get the timer accurate
       alert(rand);
+
+      this.startTimer();
     }
   };
 
-  onStart = (rand) => {
-    this.interval = BackgroundTimer.setInterval(() => {
-      this.setState({
-        second: this.state.second + 1,
-      })
-    }, 100)
+  startTimer() {
+    this.setState({
+      time: this.state.time,
+      start: Date.now() - this.state.time,
+      isOn: true
+    })
+    this.timer = setInterval(() => this.setState({
+      time: Date.now() - this.state.start
+    }), 100);
+  }
+  stopTimer() {
+    this.setState({isOn: false})
+    clearInterval(this.timer)
+  }
+  resetTimer() {
+    this.setState({time: 0})
   }
 
   render(){
     return (
       <View style={styles.container}>
+        <Text>s: {this.state.time}</Text>
         <TouchableOpacity
           activeOpacity={.8} //The opacity of the button when it is pressed
           style={this.state.colorId === 1? styles.buttonOff : styles.buttonOn}
