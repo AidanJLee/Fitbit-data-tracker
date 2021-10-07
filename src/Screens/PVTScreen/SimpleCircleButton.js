@@ -1,6 +1,7 @@
 import React, {Component , useEffect} from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, Dimensions, Alert} from 'react-native';
 
+const duration = 180000;
 
 export default class SimpleCircleButton extends Component {
   constructor(props) {
@@ -14,8 +15,10 @@ export default class SimpleCircleButton extends Component {
       total: 0,
       isCountdown: true, //used to indicate time between tests (true) and actual tests (false)
       responseTime: 0,
-      incorrectTests: 0,
-      results: []
+      falseStarts: 0,
+      results: [],
+      lapses: 0,
+      started: "CLICK TO START!"
     };
     
     this.startStopwatch = this.startStopwatch.bind(this)
@@ -25,37 +28,42 @@ export default class SimpleCircleButton extends Component {
   onPress = () => {
     var time = this.state.time;
     this.stopStopwatch();
+    this.setState({total: this.state.total + time});
+
     if (this.state.colorId === 1) //the button is currently red
     {
-      this.setState({total: this.state.total + time});
-
-      //need to put in logic for false starts
-      if (this.state.isCountdown) //clicked whilst still red but not expecting to
+      if (this.state.isCountdown) //clicked whilst still red but not expecting to (false start)
       {
-        this.setState({incorrectTests: this.state.incorrectTests + 1});
+        this.setState({falseStarts: this.state.falseStarts + 1});
         this.BeginTest();
       }
     }
     else //the button is currently green
     {
       this.setState({colorId: 1});
-      this.setState({time: 0});
-
-      this.state.results.push(time);
       this.state.responseTime = time;
 
-      if ((time < 100 || time > 355))//indicates invalid test
+      if (time < 100 && !this.state.started )//indicates invalid test
       {
-        this.state.incorrectTests = this.state.incorrectTests + 1;
+        this.state.falseStarts = this.state.falseStarts + 1;
+      }
+      else 
+      {
+        this.state.results.push(time);
+        if (time > 355){
+          this.state.lapses = this.state.lapses + 1;
+        }
       }
       this.BeginTest();      
     }
+    this.state.started = "";
   };
 
   BeginTest()
   {
     this.stopStopwatch();
-    if (this.state.total < 180000){
+    this.setState({time: 0});
+    if (this.state.total < duration){ //test duration
       var min = 1000; //min ms between tests
       var max = 4000; //max ms between tests
       var rand = min + Math.random() * (max - min); //interval between tests
@@ -73,6 +81,16 @@ export default class SimpleCircleButton extends Component {
 
   EndPVT(){
     //send data to firebase etc
+    var total = 0;
+    
+    for (var i = 0; i < this.state.results.length; i++)
+    {
+        alert('res:' + this.state.results[i]);
+        total += this.state.results[i];
+    }
+    var avg = total/this.state.results.length;
+    alert('total' + total);
+    alert('avg' + avg);
   }
 
   startStopwatch() 
@@ -90,7 +108,7 @@ export default class SimpleCircleButton extends Component {
         this.setState({colorId: 0});
         this.setState({total: this.state.total + this.state.time});
         this.stopStopwatch();
-        this.setState()
+        this.setState({time: 0});
         this.startStopwatch();
         this.setState({isCountdown: false});
       }
@@ -105,8 +123,8 @@ export default class SimpleCircleButton extends Component {
 
   stopStopwatch() {
     this.setState({isOn: false});
-    this.setState({time: 0});
-    this.setState({testInterval: 0});
+    this.state.time = 0;
+    this.state.testInterval = 0;
     clearInterval(this.timer);
   }
 
@@ -118,14 +136,15 @@ export default class SimpleCircleButton extends Component {
           style={this.state.colorId === 1? styles.buttonOff : styles.buttonOn}
           onPress={()=>this.onPress()}       
         >
-            <Text style={styles.text}>CLICK TO START</Text>
+            <Text style={styles.text}>{this.state.started}</Text>
           {this.props.children}
         </TouchableOpacity>
         <Text>Response Time: {this.state.responseTime}</Text>
-        <Text>Incorrect tests: {this.state.incorrectTests}</Text>
+        <Text>False: {this.state.falseStarts}</Text>
         <Text>Total Time: {this.state.total}</Text>
         <Text>Test Interval: {this.state.testInterval}</Text>
         <Text>s: {this.state.time}</Text>
+        <Text>lapses: {this.state.lapses}</Text>
       </View>
     )
   }
