@@ -12,37 +12,68 @@ export default class SimpleCircleButton extends Component {
       start: 0,
       testInterval: 0,
       total: 0,
-      isCountdown: false //used to indicate time between tests (true) and actual tests (false)
+      isCountdown: true, //used to indicate time between tests (true) and actual tests (false)
+      responseTime: 0,
+      incorrectTests: 0,
+      results: []
     };
     
     this.startStopwatch = this.startStopwatch.bind(this)
     this.stopStopwatch = this.stopStopwatch.bind(this)
-    this.resetStopwatch = this.resetStopwatch.bind(this)
 
   }
   onPress = () => {
+    var time = this.state.time;
+    this.stopStopwatch();
     if (this.state.colorId === 1) //the button is currently red
     {
-      this.setState({colorId: 0});
-      this.stopStopwatch();
-      this.setState({total: this.state.total + this.state.time});
-      this.resetStopwatch();
+      this.setState({total: this.state.total + time});
+
+      //need to put in logic for false starts
+      if (this.state.isCountdown) //clicked whilst still red but not expecting to
+      {
+        this.setState({incorrectTests: this.state.incorrectTests + 1});
+        this.BeginTest();
+      }
     }
     else //the button is currently green
     {
       this.setState({colorId: 1});
+      this.setState({time: 0});
 
+      this.state.results.push(time);
+      this.state.responseTime = time;
+
+      if ((time < 100 || time > 355))//indicates invalid test
+      {
+        this.state.incorrectTests = this.state.incorrectTests + 1;
+      }
+      this.BeginTest();      
+    }
+  };
+
+  BeginTest()
+  {
+    this.stopStopwatch();
+    if (this.state.total < 180000){
       var min = 1000; //min ms between tests
       var max = 4000; //max ms between tests
       var rand = min + Math.random() * (max - min); //interval between tests
 
-      //alert(rand);
-
       this.setState({testInterval: rand});
-
+      this.setState({isCountdown: true});
       this.startStopwatch();
     }
-  };
+    else 
+    {
+      this.stopStopwatch();
+      this.EndPVT();
+    }
+  }
+
+  EndPVT(){
+    //send data to firebase etc
+  }
 
   startStopwatch() 
   {
@@ -52,35 +83,36 @@ export default class SimpleCircleButton extends Component {
         start: Date.now() - this.state.time,
         isOn: true
       })
-    this.timer = setInterval(() => this.setState(
-      {
-        time: Date.now() - this.state.start
-      })
-      , 10);
-    if (this.state.isCountdown && this.state.time > this.state.testInterval){
+    this.timer = setInterval(() => 
+    {
+      if (this.state.isCountdown && this.state.time > this.state.testInterval){
         //indicates that the time period between tests has elapsed
         this.setState({colorId: 0});
-        //this.stopStopwatch();
-        //var time = this.state.time;
-        //this.setState({total: total + time});
-        //this.resetStopwatch();
-        alert('elapsed');
+        this.setState({total: this.state.total + this.state.time});
+        this.stopStopwatch();
+        this.setState()
+        this.startStopwatch();
+        this.setState({isCountdown: false});
+      }
+
+      this.setState(
+      {
+          time: Date.now() - this.state.start
+      })
     }
+    , 10);
   }
 
   stopStopwatch() {
-    this.setState({isOn: false})
-    clearInterval(this.timer)
-  }
-
-  resetStopwatch() {
-    this.setState({time: 0})
+    this.setState({isOn: false});
+    this.setState({time: 0});
+    this.setState({testInterval: 0});
+    clearInterval(this.timer);
   }
 
   render(){
     return (
       <View style={styles.container}>
-        <Text>s: {this.state.time}</Text>
         <TouchableOpacity
           activeOpacity={.8} //The opacity of the button when it is pressed
           style={this.state.colorId === 1? styles.buttonOff : styles.buttonOn}
@@ -89,6 +121,11 @@ export default class SimpleCircleButton extends Component {
             <Text style={styles.text}>CLICK TO START</Text>
           {this.props.children}
         </TouchableOpacity>
+        <Text>Response Time: {this.state.responseTime}</Text>
+        <Text>Incorrect tests: {this.state.incorrectTests}</Text>
+        <Text>Total Time: {this.state.total}</Text>
+        <Text>Test Interval: {this.state.testInterval}</Text>
+        <Text>s: {this.state.time}</Text>
       </View>
     )
   }
