@@ -9,49 +9,71 @@ export default class SimpleCircleButton extends Component {
       colorId:0 ,
       time: 0,
       isOn: false,
-      start: 0
+      start: 0,
+      testInterval: 0,
+      total: 0,
+      isCountdown: false //used to indicate time between tests (true) and actual tests (false)
     };
     
-    this.startTimer = this.startTimer.bind(this)
-    this.stopTimer = this.stopTimer.bind(this)
-    this.resetTimer = this.resetTimer.bind(this)
+    this.startStopwatch = this.startStopwatch.bind(this)
+    this.stopStopwatch = this.stopStopwatch.bind(this)
+    this.resetStopwatch = this.resetStopwatch.bind(this)
 
   }
   onPress = () => {
-    if (this.state.colorId === 1)
+    if (this.state.colorId === 1) //the button is currently red
     {
       this.setState({colorId: 0});
-      this.stopTimer();
-      var time = this.state.time;
-      this.resetTimer();
+      this.stopStopwatch();
+      this.setState({total: this.state.total + this.state.time});
+      this.resetStopwatch();
     }
-    else 
+    else //the button is currently green
     {
       this.setState({colorId: 1});
-      const min = 10;
-      const max = 40;
-      const rand = min + Math.random() * (max - min); //use this to set timer, number will be in increments of tenths of seconds ie 4 seconds = 40 tenths. this is needed to get the timer accurate
-      alert(rand);
 
-      this.startTimer();
+      var min = 1000; //min ms between tests
+      var max = 4000; //max ms between tests
+      var rand = min + Math.random() * (max - min); //interval between tests
+
+      //alert(rand);
+
+      this.setState({testInterval: rand});
+
+      this.startStopwatch();
     }
   };
 
-  startTimer() {
-    this.setState({
-      time: this.state.time,
-      start: Date.now() - this.state.time,
-      isOn: true
-    })
-    this.timer = setInterval(() => this.setState({
-      time: Date.now() - this.state.start
-    }), 100);
+  startStopwatch() 
+  {
+    this.setState(
+      {
+        time: this.state.time,
+        start: Date.now() - this.state.time,
+        isOn: true
+      })
+    this.timer = setInterval(() => this.setState(
+      {
+        time: Date.now() - this.state.start
+      })
+      , 10);
+    if (this.state.isCountdown && this.state.time > this.state.testInterval){
+        //indicates that the time period between tests has elapsed
+        this.setState({colorId: 0});
+        //this.stopStopwatch();
+        //var time = this.state.time;
+        //this.setState({total: total + time});
+        //this.resetStopwatch();
+        alert('elapsed');
+    }
   }
-  stopTimer() {
+
+  stopStopwatch() {
     this.setState({isOn: false})
     clearInterval(this.timer)
   }
-  resetTimer() {
+
+  resetStopwatch() {
     this.setState({time: 0})
   }
 
